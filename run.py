@@ -5,7 +5,7 @@ import time
 
 import tensorflow as tf
 from model import DeepDream, TiledGradients, init_model
-from utils import show, download, save_json, load_json
+from utils import show, download, save_json, load_json, check_if_local, list_web_files
 from transformations import deprocess
 from PIL import Image
 import random
@@ -68,7 +68,11 @@ def run_dd_octaves(model, img: Image,
 def run_deep_dream_config(config):
     config["time_initiate"] = time.time()
     #   image = download(config["img"], max_dim=config["max_dim"])
-    image = Image.open(config["img"])
+    if check_if_local(config['img']):
+      image = Image.open(config["img"])
+    else:
+      image = download(config['img'])
+      
     model = init_model(config['model_layers'])
 
     image = run_dd_octaves(
@@ -108,7 +112,12 @@ def run_batch_configs(batch_config, shots=100):
         if not os.path.exists(batch_config["save_dir"]):
             os.mkdir(batch_config["save_dir"])
     
-    img_files = glob.glob(f'{batch_config["img_dir"]}/*.png')
+
+    if not check_if_local(batch_config['img_dir']):
+      img_files = list_web_files(batch_config['img_dir'], 'png')
+    else:
+      img_files = glob.glob(f'{batch_config["img_dir"]}/*.png')
+
     print(f'{len(img_files)} image files found')
     
     for i, im in enumerate(img_files):
@@ -126,14 +135,14 @@ def run_batch_configs(batch_config, shots=100):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("batch", type=str, default=None, help="path to json batch config")
-    parser.add_argument("config", type=str, default=None, help="path to json single config")
+    parser.add_argument("-b", "--batch", type=str, default=None, required=False, help="path to json batch config")
+    parser.add_argument("-c", "--config", type=str, default=None, required=False, help="path to json single config")
     args = parser.parse_args()
 
     if args.batch is not None:
       config = load_json(args.batch)
       config["batch_run"] = str(time.time())
-      run_batch_configs(config, shots=args.batch["shots"])
+      run_batch_configs(config, shots=config["shots"])
     if args.config is not None:
       config = load_json(args.config)
       run_deep_dream_config(args.config)
