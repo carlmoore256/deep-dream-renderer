@@ -21,7 +21,7 @@ def download(url, max_dim=None, temp_dir="temp/"):
 def check_if_dir(dir):
   if not os.path.isdir(dir):
     print(f'{dir} does not exist, creating...')
-    os.path.mkdir(dir)
+    os.mkdir(dir)
 
 def open_image(path, max_dim=None):
   if not check_if_local(path):
