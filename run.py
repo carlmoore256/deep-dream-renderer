@@ -87,16 +87,18 @@ def run_deep_dream_config(config):
     image = tf.image.convert_image_dtype(image/255.0, dtype=tf.uint8)
 
     if config["save_dir"] is not None:
+        check_if_dir(config["meta_dir"])
+        
         file_num = 0
         filename = f'{file_num}-{config["symbol"]}-{config["collection"]}'
         img_path = os.path.join(config["save_dir"], f'{filename}.jpg')
-        meta_path = os.path.join(config["save_dir"], f'{filename}.json')
+        meta_path = os.path.join(config["meta_dir"], f'{filename}.json')
 
         while os.path.isfile(img_path) or os.path.isfile(meta_path):
             file_num += 1
             filename = f'{file_num}-{config["symbol"]}-{config["collection"]}'
             img_path = os.path.join(config["save_dir"], f'{filename}.jpg')
-            meta_path = os.path.join(config["save_dir"], f'{filename}.json')
+            meta_path = os.path.join(config["meta_dir"], f'{filename}.json')
 
         tf.keras.utils.save_img(img_path, image)
         config["time_complete"] = time.time()
@@ -110,7 +112,8 @@ def run_deep_dream_config(config):
 def run_batch_configs(batch_config, shots=100):
     # save metadata in separate nested folder for easier viewing
     check_if_dir(batch_config['save_dir'])
-    check_if_dir(os.path.join(batch_config['save_dir'], batch_config['meta_dir']))
+    meta_dir = os.path.join(batch_config['save_dir'], batch_config['meta_dir'])
+    check_if_dir(meta_dir)
 
     if not check_if_local(batch_config['img_dir']):
       img_files = list_web_files(batch_config['img_dir'], 'png')
@@ -128,6 +131,7 @@ def run_batch_configs(batch_config, shots=100):
             shot_config["octaves_range"] = random.choice(batch_config["octaves_range"])
             shot_config["octaves_scale"] = random.choice(batch_config["octaves_scale"])
             shot_config["model_layers"] = [random.choice(batch_config["model_layers"])]
+            shot_config["meta_dir"] = meta_dir
             print(f'\n=> Running DeepDream config #{s+1}/{shots} file {i}/{len(img_files)}')
             print(f'\n=> {shot_config}')
             run_deep_dream_config(shot_config)
