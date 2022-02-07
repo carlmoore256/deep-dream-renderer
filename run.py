@@ -1,10 +1,12 @@
+import argparse
 import os
 import json
 import time
 
 import tensorflow as tf
 from model import DeepDream, TiledGradients, init_model
-from utils import deprocess, show, download
+from utils import show, download, save_json, load_json
+from transformations import deprocess
 from PIL import Image
 import random
 import glob
@@ -95,27 +97,10 @@ def run_deep_dream_config(config):
         tf.keras.utils.save_img(img_path, image)
         config["time_complete"] = time.time()
         config["render_time"] = config["time_complete"] - config["time_initiate"]
-        with open(meta_path, 'w') as outfile:
-            json.dump(config, outfile, indent=2)
+
+        save_json(meta_path, config)
 
     return image, config
-
-def run_single_image(config):
-    config = {
-        "img": '/home/carl/back-of-the-router/out/23.png',
-        "name": "bionic",
-        "collection": "back-of-the-router",
-        "symbol": "BOTR",
-        "website": "homonculi.org/art",
-        "max_dim": 500,
-        "steps_per_octave": 10,
-        "step_size":0.01,
-        "octaves_range":(-3,3),
-        "octaves_scale":1.3,
-        "model_layers": [16],
-        "save_dir": "out/"
-    }
-    image, config = run_deep_dream_config(config)
 
 
 def run_batch_configs(batch_config, shots=100):
@@ -139,27 +124,16 @@ def run_batch_configs(batch_config, shots=100):
             print(f'\n=> {shot_config}')
             run_deep_dream_config(shot_config)
 
-
-
 if __name__ == "__main__":
-    # parser = argparse.ArgumentParser()
-    # parser.add_argument("config", )
-    batch_config = {
-        "img_dir" : '/home/carl/back-of-the-router/out/',
-        "name": "",
-        "collection": "Back-of-the-Router",
-        "symbol": "BOTR",
-        "website": "homonculi.org/art",
-        "max_dim": 500,
-        "steps_per_octave": list(range(1, 30)),
-        "step_size": np.linspace(0.1, 1e-5, num=100),
-        "octaves_range":[(-2,2),(-1,2),(0,2),(1,3)],
-        "octaves_scale":[1.1, 1.2, 1.3],
-        "model_layers":  [3,6,7,8,9,10,11,12,13,14,15,16],
-        "save_dir" : 'out/',
-        # "save_dir": "/content/drive/MyDrive/deep-dream-homunculi/SZT-flaimes/",
-        "batch_run" : str(time.time()),
-        "batch_tag" : "first run of suzani-tapestries with homunculi-deep-dream interface!"
-    }
+    parser = argparse.ArgumentParser()
+    parser.add_argument("batch", type=str, default=None, help="path to json batch config")
+    parser.add_argument("config", type=str, default=None, help="path to json single config")
+    args = parser.parse_args()
 
-    run_batch_configs(batch_config, shots=10)
+    if args.batch is not None:
+      config = load_json(args.batch)
+      config["batch_run"] = str(time.time())
+      run_batch_configs(config, shots=args.batch["shots"])
+    if args.config is not None:
+      config = load_json(args.config)
+      run_deep_dream_config(args.config)
