@@ -23,8 +23,9 @@ if __name__ == '__main__':
         "step_size": list(np.linspace(0.1, 1e-5, num=100)),
         "octaves_range": list(combinations(list(range(-2,3)), 2)),
         "octaves_scale": [1.1, 1.2, 1.3],
-        "model_layers":  [3,6,7,8,9,10,11,12,13,14,15,16],
+        "model_layers":  list(range(3,50)), # [3,6,7,8,9,10,11,12,13,14,15,16]
         "save_dir" : 'out/',
+        "meta_dir" : 'metadata/',
         # "save_dir": "/content/drive/MyDrive/deep-dream-homunculi/SZT-flaimes/",
         "batch_tag" : "back of the router deep dream images"
     }

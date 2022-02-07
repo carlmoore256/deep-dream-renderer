@@ -5,7 +5,7 @@ import time
 
 import tensorflow as tf
 from model import DeepDream, TiledGradients, init_model
-from utils import show, download, save_json, load_json, check_if_local, list_web_files
+from utils import show, download, save_json, load_json, check_if_local, list_web_files, check_if_dir
 from transformations import deprocess
 from PIL import Image
 import random
@@ -72,7 +72,7 @@ def run_deep_dream_config(config):
       image = Image.open(config["img"])
     else:
       image = download(config['img'])
-      
+
     model = init_model(config['model_layers'])
 
     image = run_dd_octaves(
@@ -108,10 +108,9 @@ def run_deep_dream_config(config):
 
 
 def run_batch_configs(batch_config, shots=100):
-    if batch_config["save_dir"] is not None:
-        if not os.path.exists(batch_config["save_dir"]):
-            os.mkdir(batch_config["save_dir"])
-    
+    # save metadata in separate nested folder for easier viewing
+    check_if_dir(batch_config['save_dir'])
+    check_if_dir(os.path.join(batch_config['save_dir'], batch_config['meta_dir']))
 
     if not check_if_local(batch_config['img_dir']):
       img_files = list_web_files(batch_config['img_dir'], 'png')
