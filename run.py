@@ -88,7 +88,7 @@ def run_deep_dream_config(config):
 
     if config["save_dir"] is not None:
         check_if_dir(config["meta_dir"])
-        
+
         file_num = 0
         filename = f'{file_num}-{config["symbol"]}-{config["collection"]}'
         img_path = os.path.join(config["save_dir"], f'{filename}.jpg')
@@ -148,4 +148,4 @@ if __name__ == "__main__":
       run_batch_configs(config, shots=config["shots"])
     if args.config is not None:
       config = load_json(args.config)
-      run_deep_dream_config(args.config)
+      run_deep_dream_config(config)

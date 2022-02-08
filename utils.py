@@ -5,6 +5,7 @@ from PIL import Image
 import numpy as np
 import json
 import os
+import glob
 
 # Download an image and read it into a NumPy array.
 def download(url, max_dim=None, temp_dir="temp/"):
@@ -56,3 +57,6 @@ def list_web_files(url, ext='png'):
     print(page)
     soup = BeautifulSoup(page, 'html.parser')
     return [url + '/' + node.get('href') for node in soup.find_all('a') if node.get('href').endswith(ext)]
+
+def list_all_files_type(path: str, ext: str):
+  return glob.glob(f'{path}/*.{ext}')

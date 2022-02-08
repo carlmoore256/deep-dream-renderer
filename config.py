@@ -1,13 +1,25 @@
 import numpy as np
 from itertools import combinations
-from utils import save_json, check_if_dir
+from utils import load_json, save_json, check_if_dir, list_all_files_type
 import os
+from run import run_deep_dream_config
 
 CONFIG_PATH = "configs/"
 
 def save_config(config, filename):
     check_if_dir(CONFIG_PATH)
     save_json(os.path.join(CONFIG_PATH, filename), config)
+
+def run_config_new_file(input_img, output_dir='out/renders', config_path='out/metadata/', config_num=None):
+    if config_num is not None:
+        files = list_all_files_type(config_path, 'json')
+        splits = [os.path.split(x)[-1] for x in files]
+        path = list(filter(lambda x : (int(x.split('-')[0]) == config_num), splits))[0]
+        path = os.path.join(config_path, path)
+        config = load_json(path)
+        config['img'] = input_img
+        config['save_dir'] = output_dir
+        run_deep_dream_config(config)
 
 if __name__ == '__main__':
         
